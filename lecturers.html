@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Shamir &amp; Alex project</title>
+        <meta charset="UTF-8">
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script src = "scripts/connectPhp.js"></script>
+        <script src="scripts/loadingPage.js" lang="javascript"></script>
+        <link rel="stylesheet" href="includes/style.css">
+    </head>
+    <body onLoad="OnLoad()">
+        <script>document.write(pageTemplate) </script>
+        <section>
+            <article>
+                <form>
+                    <h3 id="statusMassage">Enter and Submit</h3>
+                    <p><label>Lecturer ID Number: </label><input type="text" required name="lecturer_id" placeholder="Enter ID Number"></p>
+                    <p><label>First Name: </label><input type="text" name="first_name" placeholder="Type First Name"></p>
+                    <p><label>Last Name: </label><input type="text" name="last_name" placeholder="Type Last Name"></p>
+                    <p><label>Phone Number: </label><input type="text" name="phone" placeholder="050-1234567"></p>
+                    <p><label>BirthDate: </label><input type="text" name="birthdate" placeholder="1981-03-19"></p>
+                    <p><label>Address: </label><input type="text" name="address" placeholder="Type Address"></p>
+                    <p>
+                        <input type="button" value="Add" onClick="lecturer.add()">
+                        <input type="button" value="Update" onClick="lecturer.edit()">
+                        <input type="button" value="Delete" onClick="lecturer.erase()">
+                        <input type="button" value="Refresh" onClick="reloadPage()">
+                        <input type="reset" value="Clear Fields">
+                    </p>
+                    <p>
+                        <input name="xxx" type="search" placeholder="Enter lecturer ID Number">
+                        <input type="button" value="Search" onClick="lecturer.search()">
+                    </p>
+                </form>
+            </article>
+        </section>
+        <section id="lecturerTable">
+        </section>
+        <script>document.write(endOfTemplate);</script>
+        <script>
+            (function(){
+                loadData("./php/get_lecturers_info.php", "#lecturerTable");
+            })();
+        </script>
+    </body>
+</html>

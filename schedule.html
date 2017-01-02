@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Shamir &amp; Alex project</title>
+        <meta charset="UTF-8">
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script src = "scripts/connectPhp.js"></script>
+        <script src="scripts/loadingPage.js" lang="javascript"></script>
+        <link rel="stylesheet" href="includes/style.css">
+    </head>
+    <body onLoad="OnLoad()">
+        <script>document.write(pageTemplate) </script>
+        <section>
+            <article>
+                <form>
+                    <h3 id="statusMassage">Enter and Submit</h3>
+                    <p><label>Course Number: </label><input type="text" required name="course_num" placeholder="Enter Course Number"></p>
+                    <p><label>Lecturer ID Number: </label><input type="text" list="lecturers" name="lecturer_id" placeholder="Enter ID Number"></p>
+                        <datalist id="lecturers"> </datalist>
+                    <p><label>Class Number: </label><input type="text" list="classes" name="class_num" placeholder="Enter Class Number"></p>
+                        <datalist id="classes"> </datalist>
+                    <p><label>Day: </label><input type="text" list="days" name="day" placeholder="Choose a day"></p>
+                        <datalist id="days">
+                            <option value="Sun" selected>
+                            <option value="Mon">
+                            <option value="Tue">
+                            <option value="Wed">
+                            <option value="Thu">
+                            <option value="Fri">
+                        </datalist>
+                    <p><label>Starting Hour: </label><input type="number" name="hour" min="08" max="20" step="1"></p>
+                    <p>
+                        <input type="button" value="Update" onClick="schedule.update()">
+                        <input type="button" value="Refresh" onClick="reloadPage()">
+                        <input type="reset" value="Clear Fields">
+                    </p>
+                </form>
+            </article>
+        </section>
+        <section id="unpairedCoursesTable">
+        </section>
+        <script>document.write(endOfTemplate);</script>
+        <script>
+            (function(){
+                loadData("./php/get_unpaired_courses_table_info.php", "#unpairedCoursesTable");
+            })();
+        </script>
+    </body>
+</html>

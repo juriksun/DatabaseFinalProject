@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Shamir &amp; Alex project</title>
+        <meta charset="UTF-8">
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script src = "scripts/connectPhp.js"></script>
+        <script src="scripts/loadingPage.js" lang="javascript"></script>
+        <link rel="stylesheet" href="includes/style.css">
+    </head>
+    <body onLoad="OnLoad()">
+        <script>document.write(pageTemplate) </script>
+            <article>
+            </article>
+            <article>
+            </article>
+            <article>
+                <h3 id="statusMassage">Enter and Submit</h3>
+                <h3>Choose day and hour range:</h3>
+                <p><label>From</label>
+                    <select id="fromDay">
+                        <option value="1" label="Sun" selected></option>
+                        <option value="2" label="Mon"></option>
+                        <option value="3" label="Tue"></option>
+                        <option value="4" label="Wed"></option>
+                        <option value="5" label="Thu"></option>
+                        <option value="6" label="Fri"></option>
+                    </select>
+                    <input type="number" name="fromHour" min="08" max="20" step="1" placeholder="Hour">
+                </p>
+                <p>
+                    <label>To</label>
+                    <select id="toDay">
+                        <option value="1" label="Sun" selected></option>
+                        <option value="2" label="Mon"></option>
+                        <option value="3" label="Tue"></option>
+                        <option value="4" label="Wed"></option>
+                        <option value="5" label="Thu"></option>
+                        <option value="6" label="Fri"></option>
+                    </select>
+                    <input type="number" name="toHour" min="08" max="20" step="1" placeholder="Hour">
+                    <p>
+                    <input type="button" value="Search" onClick="index.search()">
+                    </p>
+                </p>
+            </article>
+        <hr>
+        <section id="scheduleTable">
+        </section>
+        <script>
+            (function(){
+                loadData("./php/get_schedule_info.php", "#scheduleTable");
+            })();
+        </script>
+        <script> document.write(endOfTemplate);</script>
+    </body>
+</html>

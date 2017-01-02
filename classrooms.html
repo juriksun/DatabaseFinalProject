@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Shamir &amp; Alex project</title>
+        <meta charset="UTF-8">
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script src = "scripts/connectPhp.js"></script>
+        <script src="scripts/loadingPage.js" lang="javascript"></script>
+        <link rel="stylesheet" href="includes/style.css">
+    </head>
+    <body onLoad="OnLoad()">
+        <script>document.write(pageTemplate) </script>
+        <section>
+            <article>
+                <form>
+                    <h3 id="statusMassage">Enter and Submit</h3>
+                    <p><label>Building Name: </label><input type="text" list="buildings" name="building_name" placeholder="Enter Building Name">
+                        <datalist id="buildings">
+                            <option value="Pernick">
+                            <option value="Mitchell">
+                        </datalist>
+                    </p>
+                    <p><label>Classroom Number: </label><input type="text" required name="class_num" placeholder="Enter The Classroom Number"></p>
+                    <p><label>Floor Number: </label><input type="number" name="floor_num" min="0" max="7" placeholder="Enter The Floor Number"></p>
+                    <p>
+                        <input type="button" value="Add" onClick="classroom.add()">
+                        <input type="button" value="Update" onClick="classroom.edit()">
+                        <input type="button" value="Delete" onClick="classroom.erase()">
+                        <input type="button" value="Refresh" onClick="reloadPage()">
+                        <input type="reset" value="Clear Fields">
+                    </p>
+                    <p>
+                        <input name="xxx" type="search" placeholder="Enter Class Number">
+                        <input type="button" value="Search" onClick="classroom.search()">
+                    </p>
+                </form>
+            </article>
+        </section>
+        <section id="classTable">
+        </section>
+        <script>document.write(endOfTemplate);</script>
+        <script>
+            (function(){
+                loadData("./php/get_classes_info.php", "#classTable");
+            })();
+        </script>
+    </body>
+</html>
