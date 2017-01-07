@@ -176,5 +176,22 @@ connection.query('INSERT INTO phone (lecturer_id, phone_num) VALUES' +
     '(\'01109999\', \'054-8900891\'),'+
     '(\'12345678\', \'052-0989190\');'
 );
+
+//trigger for delete one of phones if user want to enter more then 3
+connection.query(
+                    ' CREATE TRIGGER delete_phone BEFORE INSERT ON phone' +
+                    ' FOR EACH ROW' +
+                    ' BEGIN' +
+                    ' DECLARE num_of_phones integer;' +
+                    ' DECLARE msg VARCHAR(255);' +
+                    ' SELECT COUNT(phone_num) INTO num_of_phones FROM phone WHERE lecturer_id = NEW.lecturer_id;' +
+                    ' IF(num_of_phones > 2)' +
+                    ' THEN' +
+                    ' set msg = \"DIE: You broke the rules... I will now Smite you, hold still...\";' +
+                    ' SIGNAL SQLSTATE \'45000\' SET MESSAGE_TEXT = msg;' +
+                    ' END IF;' +
+                    ' END;'
+);
+
 //disconnection
 connection.end();
