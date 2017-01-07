@@ -11,10 +11,8 @@
     // Create a query for the database
     $query = "SELECT lecturer.last_name, lecturer.first_name, course.course_name, class.class_num, takes_place.day, takes_place.hour
               FROM lecturer
-              INNER JOIN teaches
-              ON lecturer.lecturer_id=teaches.lecturer_id
               INNER JOIN takes_place
-              ON teaches.course_num=takes_place.course_num
+              ON lecturer.lecturer_id=takes_place.course_num
               INNER JOIN course
               ON course.course_num=takes_place.course_num
               INNER JOIN class

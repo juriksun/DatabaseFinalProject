@@ -40,7 +40,7 @@
         $query1 .='address="'.trim($_POST['address']).'"';
     }
 
-    $query1 .=' WHERE lecturer_id="'.$lecturer_id'"';
+    $query1 .=' WHERE lecturer_id="'.$lecturer_id.'"';
 
     if (mysqli_query($dbc, $query1)) {
         echo "true";

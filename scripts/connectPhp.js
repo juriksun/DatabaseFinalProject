@@ -262,7 +262,7 @@ var lecturer = {
 var schedule = {
     update: function(){
         var course_num = $("input[name=course_num]").val();
-        var lecturer_id = $("input[name=lecturer_id]").val();
+
         var class_num = $("input[name=class_num]").val();
         var day = $("input[name=day]").val();
         var hour = $("input[name=hour]").val();
@@ -271,7 +271,7 @@ var schedule = {
         } else{
             hour = (!hour)?hour:(hour+":00:00");
             $.post("./php/update_schedule.php", {
-                l_id:lecturer_id, co_num:course_num, cl_num:class_num, day:day, hour:hour
+               co_num:course_num, cl_num:class_num, day:day, hour:hour
             }, function (data) {
                 if (data == "true") {
                     $("#statusMassage").html("The course"+ "Associate with class" +class_num);

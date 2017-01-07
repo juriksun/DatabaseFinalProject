@@ -24,7 +24,7 @@
                 $row['course_num'] . '</td><td>' .
                 $row['course_name'] . '</td><td>' .
                 $row['semester'] . '</td><td>' .
-                $row['year'] . '</td><td>' .
+                $row['year'] . '</td><td style="text-align:center;">' .
                 $row['num_of_hours'] . '</td><td>'.
                  $row['lecturer_id'] . '</td>';
             echo '</tr>';
