@@ -9,16 +9,11 @@
 // Get a connection for the database
     require_once('mysqli_connect.php');
     // Create a query for the database
-    $query = "SELECT lecturer.last_name, lecturer.first_name, course.course_name, class.class_num
-              FROM lecturer
-              INNER JOIN teaches
-              ON lecturer.lecturer_id=teaches.lecturer_id
-              INNER JOIN takes_place
-              ON teaches.course_num=takes_place.course_num 
-              INNER JOIN course
-              ON course.course_num=takes_place.course_num
-              INNER JOIN class
-              ON class.class_num=takes_place.class_num
+    $query = "SELECT lecturer.last_name, lecturer.first_name, course.course_name, takes_place.class_num
+              FROM class
+              INNER JOIN takes_place ON class.class_num = takes_place.class_num
+              INNER JOIN course ON takes_place.course_num = course.course_num
+              INNER JOIN lecturer ON course.lecturer_id = lecturer.lecturer_id
               WHERE class.class_num=".$xxx."
               ORDER BY class.class_num";
 
