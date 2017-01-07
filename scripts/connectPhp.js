@@ -5,12 +5,13 @@ var course = {
         var semester = $("input[name=semester]").val();
         var year = $("input[name=year]").val();
         var num_of_hours = $("input[name=num_of_hours]").val();
+        var lecturer_id = $("input[name=lecturer_id]").val();
 
-        if(course_name == "" || semester == "" || year == "" || num_of_hours == ""){
+        if(course_num == "" || course_name == "" || semester == "" || year == "" || num_of_hours == "" || lecturer_id == ""){
             $("#statusMassage").html("You must fill all the fields to add new course!!!");
         } else {
             $.post("./php/add_course.php", {
-                c_num: course_num, c_name: course_name, c_semester: semester, c_year: year, c_hours: num_of_hours
+                c_num: course_num, c_name: course_name, c_semester: semester, c_year: year, c_hours: num_of_hours, l_id: lecturer_id
             }, function(data){
                 if(data == "true"){
                     $("#statusMassage").html("Course added");
@@ -28,12 +29,13 @@ var course = {
         var semester = $("input[name=semester]").val();
         var year = $("input[name=year]").val();
         var num_of_hours = $("input[name=num_of_hours]").val();
+        var lecturer_id = $("input[name=lecturer_id]").val();
 
-        if(course_num == "" || (course_name == "" && semester == "" && year == "" && num_of_hours == "")){
+        if(course_num == "" || (course_name == "" && semester == "" && year == "" && num_of_hours == "" && lecturer_id == "")){
             $("#statusMassage").html("You must enter course number");
         } else {
             $.post("./php/update_course.php", {
-                c_num: course_num, c_name:course_name, c_semester: semester, c_year: year, c_hours: num_of_hours
+                c_num: course_num, c_name: course_name, c_semester: semester, c_year: year, c_hours: num_of_hours, l_id: lecturer_id
             }, function(data){
                 if(data == "true"){
                     $("#statusMassage").html("Course edit");
@@ -51,8 +53,9 @@ var course = {
         var semester = $("input[name=semester]").val();
         var year = $("input[name=year]").val();
         var num_of_hours = $("input[name=num_of_hours]").val();
+        var lecturer_id = $("input[name=lecturer_id]").val();
 
-        if(course_num == "" || course_name != "" || semester != "" || year != "" || num_of_hours != ""){
+        if(course_num == "" || course_name != "" || semester != "" || year != "" || num_of_hours != "" || lecturer_id != ""){
             $("#statusMassage").html("You must enter course number only!");
         } else {
             $.post("./php/erase_course.php", {
@@ -159,11 +162,22 @@ var lecturer = {
         var birthdate = $("input[name=birthdate]").val();
         var address = $("input[name=address]").val();
 
-        if(lecturer_id == "" || first_name == "" || last_name == "" || phone == "" || birthdate == "" || address == ""){
+        if(lecturer_id != "" && phone != "" && first_name == "" && last_name == "" && birthdate == "" && address == ""){
+            $.post("./php/add_lecturer_phone.php", {
+                l_id:lecturer_id, phone_num:phone
+            }, function(data){
+                if(data == "true"){
+                    $("#statusMassage").html("Phone added");
+                    loadData("./php/get_lecturers_info.php", "#lecturerTable");
+                }else{
+                    $("#statusMassage").html(data);
+                }
+            });
+        } else if(lecturer_id == "" || first_name == "" || last_name == "" || birthdate == "" || address == "" || phone == ""){
             $("#statusMassage").html("You must fill all fields to add new lecturer!!!");
-        } else {
+        }else {
             $.post("./php/add_lecturer.php", {
-                    l_id: lecturer_id, f_name: first_name, l_name:last_name, phone_num: phone, b_date: birthdate, address: address
+                    l_id: lecturer_id, f_name: first_name, l_name: last_name, phone_num: phone, b_date: birthdate, address: address
             }, function(data){
                 if(data == "true"){
                     $("#statusMassage").html("Lecturer added");
@@ -183,11 +197,13 @@ var lecturer = {
         var birthdate = $("input[name=birthdate]").val();
         var address = $("input[name=address]").val();
 
-        if(lecturer_id == "" || (first_name == "" && last_name == "" && phone == "" && birthdate == "" && address == "")){
+        if(lecturer_id == "" || (first_name == "" && phone == "" && last_name == "" && birthdate == "" && address == "")){
             $("#statusMassage").html("You must enter lecturer id");
+        }else if(phone != ""){
+            $("#statusMassage").html("You can't update the number");
         } else {
             $.post("./php/update_lecturer.php", {
-                l_id:lecturer_id, f_name:first_name, l_name:last_name, phone_num:phone, b_date:birthdate, address: address
+                l_id:lecturer_id, f_name:first_name, l_name:last_name, b_date:birthdate, address: address
             }, function(data){
                 if(data == "true"){
                     $("#statusMassage").html("Lecturer added");
@@ -251,29 +267,17 @@ var schedule = {
         var day = $("input[name=day]").val();
         var hour = $("input[name=hour]").val();
         if(course_num == "") {
-            $("#statusMassage").html("You must fill course number!!!");
-
-
+            $("#statusMassage").html("You must fill all fields!!!");
         } else{
-            $.post("./php/update_schedule.php", {
-                do: "teaches", co_num:course_num, l_id:lecturer_id
-            }, function (data) {
-                if (data == "true") {
-                    $("#statusMassage").html("Teaches updated");
-                    loadData("./php/get_unpaired_courses_table_info.php", "#unpairedCoursesTable");
-                } else {
-                    $("#statusMassage").html(" Teaches not updated!!!" + data);
-                }
-            });
             hour = (!hour)?hour:(hour+":00:00");
             $.post("./php/update_schedule.php", {
-                do:"takes_place", co_num:course_num, cl_num:class_num, day:day, hour:hour
+                l_id:lecturer_id, co_num:course_num, cl_num:class_num, day:day, hour:hour
             }, function (data) {
                 if (data == "true") {
-                    $("#statusMassage").html($("#statusMassage").html() + " Takes Place updated");
+                    $("#statusMassage").html("The course"+ "Associate with class" +class_num);
                     loadData("./php/get_unpaired_courses_table_info.php", "#unpairedCoursesTable");
                 } else {
-                    $("#statusMassage").html($("#statusMassage").html() + " Take places not updated!!!" + data);
+                    $("#statusMassage").html("The not course Associate");
                 }
             });
         }
@@ -295,9 +299,6 @@ function eraseDelay(element, msg){
         $(element).html(msg);
     },5000);
 }
-
-
-
 
 var index = {
     search: function(){

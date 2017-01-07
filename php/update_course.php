@@ -39,6 +39,12 @@
         }
         $sql .='num_of_hours='.trim($_POST['c_hours']);
     }
+    if(!empty($_POST['l_id'])){
+        if($entered){
+            $sql .=', ';
+        }
+        $sql .='lecturer_id="'.trim($_POST['l_id']).'"';
+    }
 
     $sql .=' WHERE course_num='.$c_num;
 

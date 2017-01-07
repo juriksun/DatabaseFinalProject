@@ -2,13 +2,11 @@
     // Get a connection for the database
     require_once('mysqli_connect.php');
     // Create a query for the database
-    $query =    "SELECT course.course_name, course.course_num, teaches.lecturer_id, takes_place.class_num
+    $query =    "SELECT course.course_name, course.course_num, course.lecturer_id, takes_place.class_num
                 FROM course
                 LEFT OUTER JOIN takes_place
                 ON takes_place.course_num=course.course_num
-                LEFT JOIN teaches
-                ON course.course_num=teaches.course_num
-                WHERE (teaches.course_num IS NULL) OR (takes_place.class_num IS NULL)
+                WHERE takes_place.class_num IS NULL
                 ORDER BY course.course_num";
 
     // Get a response from the database by sending the connection

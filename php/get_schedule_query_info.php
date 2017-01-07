@@ -30,12 +30,12 @@
 // Get a connection for the database
     require_once('mysqli_connect.php');
     // Create a query for the database
-    $query =    "SELECT lecturer.last_name, lecturer.first_name, lecturer.lecturer_id, ".
-                "course.course_name, takes_place.class_num, takes_place.day, takes_place.hour ".
-                "FROM lecturer INNER JOIN teaches ON lecturer.lecturer_id = teaches.lecturer_id ".
-                "INNER JOIN course ON course.course_num = teaches.course_num ".
-                "INNER JOIN takes_place ON takes_place.course_num = teaches.course_num ".
-                "WHERE (day between ".$s_day." and ".$e_day.") and (hour between '".$s_hour."' and '".$e_hour."')";
+    $query =    "SELECT lecturer.last_name, lecturer.first_name, lecturer.lecturer_id,
+                course.course_name, takes_place.class_num, takes_place.day, takes_place.hour,
+                DATE_ADD(takes_place.hour, INTERVAL course.num_of_hours HOUR) as end_hour
+                FROM lecturer INNER JOIN course ON lecturer.lecturer_id = course.lecturer_id
+                INNER JOIN takes_place ON takes_place.course_num = course.course_num
+                WHERE (day between ".$s_day." and ".$e_day.") and (hour between '".$s_hour."' and '".$e_hour."')";
 
     // Get a response from the database by sending the connection
     // and the query
@@ -51,7 +51,8 @@
                     <td><b>Course Name</b></td>
                     <td><b>Class Number</b></td>
                     <td><b>Day</b></td>
-                    <td><b>Hour</b></td></tr>';
+                    <td><b>From</b></td>
+                    <td><b>To</b></td></tr>';
 
         // mysqli_fetch_array will return a row of data from the query
         // until no further data is available
@@ -63,7 +64,8 @@
                 $row['course_name'] . '</td><td>' .
                 $row['class_num'] . '</td><td>' .
                 $row['day'] . '</td><td>' .
-                $row['hour'] .'</td>';
+                $row['hour'] . '</td><td>' .
+                $row['end_hour'] .'</td>';
             echo '</tr>';
         }
         echo '</table>';

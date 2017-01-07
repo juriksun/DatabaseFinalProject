@@ -39,14 +39,21 @@
         // Trim white space from the name and store the name
         $num_of_hours = trim($_POST['c_hours']);
     }
+    if(empty($_POST['l_id'])){
+        // Adds name to array
+        $data_missing[] = 'Lecturer ID';
+    } else {
+        // Trim white space from the name and store the name
+        $lecturer_id = trim($_POST['l_id']);
+    }
 
     if(empty($data_missing)) {
         require_once('mysqli_connect.php');
-        $query = "INSERT INTO course (course_num, course_name, semester, year, num_of_hours) VALUES (?, ?, ?, ?, ?)";
+        $query = "INSERT INTO course (course_num, course_name, semester, year, num_of_hours, lecturer_id) VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($dbc, $query);
 
-        mysqli_stmt_bind_param($stmt, "sssss", $course_num, $course_name,
-            $semester, $year, $num_of_hours);
+        mysqli_stmt_bind_param($stmt, "ssssss",
+            $course_num, $course_name, $semester, $year, $num_of_hours, $lecturer_id);
         mysqli_stmt_execute($stmt);
         $affected_rows = mysqli_stmt_affected_rows($stmt);
         if($affected_rows == 1){
@@ -55,7 +62,7 @@
             //mysqli_close($dbc);
         } else {
             echo 'Error Occurred<br/>';
-            echo mysqli_error();
+            echo mysqli_error($dbc);
             mysqli_stmt_close($stmt);
             //mysqli_close($dbc);
         }

@@ -2,7 +2,7 @@
     // Get a connection for the database
     require_once('mysqli_connect.php');
     // Create a query for the database
-    $query = "SELECT course_num, course_name, semester, year, num_of_hours FROM course";
+    $query = "SELECT course_num, course_name, semester, year, num_of_hours, lecturer_id FROM course";
     // Get a response from the database by sending the connection
     // and the query
     $response = @mysqli_query($dbc, $query);
@@ -14,7 +14,8 @@
             <td><b>Course name</b></td>
             <td><b>Semester</b></td>
             <td><b>Year</b></td>
-            <td><b>Number of_hours</b></td></tr>';
+            <td><b>Number of_hours</b></td>
+             <td><b>Lecturer id</b></td></tr>';
 
         // mysqli_fetch_array will return a row of data from the query
         // until no further data is available
@@ -24,7 +25,8 @@
                 $row['course_name'] . '</td><td>' .
                 $row['semester'] . '</td><td>' .
                 $row['year'] . '</td><td>' .
-                $row['num_of_hours'] . '</td>';
+                $row['num_of_hours'] . '</td><td>'.
+                 $row['lecturer_id'] . '</td>';
             echo '</tr>';
         }
         echo '</table>';
