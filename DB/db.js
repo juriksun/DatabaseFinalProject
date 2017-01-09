@@ -194,68 +194,82 @@ connection.query(
 
 //trigger for checking if lecturer is available before update course to him
 connection.query(
-                    'CREATE TRIGGER secure_lecturers_classes BEFORE UPDATE ON course'+
+                    ' DROP TRIGGER IF EXISTS secure_lecturers_classes'+
+                    ' CREATE TRIGGER secure_lecturers_classes BEFORE UPDATE ON course'+
                     ' FOR EACH ROW'+
                     ' BEGIN'+
-                    ' DECLARE msg VARCHAR(255);'+
 
                     ' DECLARE acourse_num INTEGER;'+
                     ' DECLARE asemester VARCHAR(1);'+
-                    ' DECLARE aday ENUM(\'Sun\',\'Mon\',\'Tue\',\'Wed\',\'Thu\',\'Fri\');'+
+                    ' DECLARE aday INTEGER;'+
                     ' DECLARE anum_of_hours INTEGER;'+
                     ' DECLARE astart_time INTEGER;'+
                     ' DECLARE aend_time INTEGER;'+
                     ' DECLARE alecturer_id VARCHAR(10);'+
                     ' DECLARE aclass_num INTEGER;'+
 
-                    ' DECLARE acount_lecturer INTEGER;'+
-                    ' DECLARE acount_takeplace INTEGER;'+
-
                     ' SET acourse_num = NEW.course_num;'+
                     ' SET asemester = NEW.semester;'+
                     ' SET anum_of_hours = NEW.num_of_hours;'+
                     ' SET alecturer_id = NEW.lecturer_id;'+
 
-                    ' SELECT course_plus.start_time, course_plus.end_time, course_plus.class_num, course_plus.day INTO astart_time, aend_time, aclass_num, aday'+
+                    ' SELECT course_plus.start_time, course_plus.end_time, course_plus.class_num, course_plus.day'+
+                    ' INTO astart_time, aend_time, aclass_num, aday'+
                     ' FROM'+
-                    ' (  SELECT (TIME_TO_SEC(takes_place.hour)/3600) as start_time,'+
-                        ' (TIME_TO_SEC(DATE_ADD(takes_place.hour, INTERVAL anum_of_hours HOUR))/3600) as end_time,'+
-                        ' takes_place.class_num as class_num, course.course_num as course_num, takes_place.day as day'+
-                        ' FROM takes_place INNER JOIN course ON course.course_num = takes_place.course_num'+
-                    ' )AS course_plus'+
-                    ' WHERE	course_plus.course_num = acourse_num;'+
-
-                    ' SELECT COUNT(course_plus2.course_num) INTO acount_takeplace'+
-                    ' FROM('+
-                        ' SELECT (TIME_TO_SEC(takes_place.hour)/3600) as start_time,'+
-                        ' (TIME_TO_SEC(DATE_ADD(takes_place.hour, INTERVAL anum_of_hours HOUR))/3600) as end_time,'+
-                    ' course.course_num as course_num, takes_place.day as day'+
+                    '('+
+                    ' SELECT (TIME_TO_SEC(takes_place.hour)/3600) as start_time,'+
+                    ' (TIME_TO_SEC(DATE_ADD(takes_place.hour, INTERVAL anum_of_hours HOUR))/3600) as end_time,'+
+                    ' takes_place.class_num as class_num, course.course_num as course_num, takes_place.day as day'+
                     ' FROM takes_place INNER JOIN course ON course.course_num = takes_place.course_num'+
-                    ' WHERE	takes_place.class_num = aclass_num AND course.semester = asemester AND takes_place.day = aday'+
-                    ' AND course.course_num != acourse_num'+
-                    ' )AS course_plus2'+
-
-                    ' WHERE('+
-                        ' (course_plus2.start_time < astart_time'+
-                    ' AND course_plus2.end_time >= astart_time)'+
-                    ' OR'+
-                    ' (course_plus2.start_time <= aend_time'+
-                    ' AND course_plus2.end_time > aend_time)'+
-                    ' OR'+
-                    ' (course_plus2.start_time >= astart_time'+
-                    ' AND course_plus2.end_time <= aend_time)'+
-                    ' )'+
-                    ' ;'+
+                    ')AS course_plus'+
+                    'WHERE	course_plus.course_num = acourse_num;'+
 
 
-                    ' IF((acount_lecturer > 0) OR (acount_takeplace > 0))'+
-                    ' THEN' +
-                    ' set msg = \"The are Problems with the requested change. Please check the Lecturer or the class scheduele\";'+
-                    ' SIGNAL SQLSTATE \'45000\' SET MESSAGE_TEXT = msg;' +
-                    ' END IF;' +
+                    ' CALL check_lecturer_and_takes_place(acourse_num, asemester, aday,'+
+                    ' anum_of_hours, astart_time, aend_time, alecturer_id, aclass_num);'+
                     ' END;'
 );
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+ *Insert takes_places
+ */
+
+connection.query(
+                    ' DROP TRIGGER IF EXISTS secure_lecturers_classes'+
+                    ' CREATE TRIGGER secure_lecturers_classes_by_takes_place_insert BEFORE INSERT ON takes_place'+
+                    ' FOR EACH ROW'+
+                    ' BEGIN'+
+
+                    ' DECLARE acourse_num INTEGER;'+
+                    ' DECLARE asemester VARCHAR(1);'+
+                    ' DECLARE aday INTEGER;'+
+                    ' DECLARE anum_of_hours INTEGER;'+
+                    ' DECLARE astart_time INTEGER;'+
+                    ' DECLARE aend_time INTEGER;'+
+                    ' DECLARE alecturer_id VARCHAR(10);'+
+                    ' DECLARE aclass_num INTEGER;'+
+
+                    ' SET acourse_num = NEW.course_num;'+
+                    ' SET aday = NEW.day;'+
+                    ' SET astart_time = (TIME_TO_SEC(NEW.hour)/3600);'+
+                    ' SET aclass_num = NEW.class_num;'+
+
+                    ' SELECT course_plus.semester, course_plus.num_of_hours, course_plus.end_time, course_plus.lecturer_id'+
+                    ' INTO asemester, anum_of_hours, aend_time, alecturer_id'+
+                    ' FROM'+
+                    ' ('+
+                    'SELECT course.semester as semester, course.num_of_hours as num_of_hours,'+
+                    '(course.num_of_hours + astart_time) as end_time, course.lecturer_id as lecturer_id,'+
+                    ' course.course_num as course_num'+
+                    ' FROM course'+
+                    ' WHERE	course.course_num = acourse_num'+
+                    ')AS course_plus;'+
+
+                    ' CALL check_lecturer_and_takes_place(acourse_num, asemester, aday,'+
+                    ' anum_of_hours, astart_time, aend_time, alecturer_id, aclass_num);'+
+                    ' END;'
+);
 
 //disconnection
 connection.end();
