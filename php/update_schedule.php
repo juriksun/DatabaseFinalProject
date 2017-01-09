@@ -40,7 +40,7 @@
             if (mysqli_query($dbc, $query)) {
                 echo "true";
             } else {
-                    echo "Error updating record: " . mysqli_error($dbc);
+                echo "Error updating record: " . mysqli_error($dbc);
             }
         } else {
             echo 'You need to enter the following data<br/>';

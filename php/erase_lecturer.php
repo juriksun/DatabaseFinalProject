@@ -22,8 +22,9 @@
         } else {
             // Trim white space from the name and store the name
             $phone_num= trim($_POST['phone_num']);
-            $sql = 'DELETE FROM phone WHERE phone_num="'.$phone_num.'"';
-            if (mysqli_query($dbc, $sql)) {
+            $sql = 'DELETE FROM phone WHERE phone_num="'.$phone_num.'" AND lecturer_id = "'.$l_id.'"';
+            mysqli_query($dbc, $sql);
+            if (mysqli_affected_rows($dbc)>0) {
                 echo "true2";
             } else {
                 echo 'Error Occurred<br/>';
