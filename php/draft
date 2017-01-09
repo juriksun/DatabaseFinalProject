@@ -1,3 +1,6 @@
+/*
+*Update course
+*/
 DELIMITER //
 DROP TRIGGER IF EXISTS secure_lecturers_classes//
 CREATE TRIGGER secure_lecturers_classes BEFORE UPDATE ON course
@@ -22,7 +25,8 @@ BEGIN
 	SET anum_of_hours = NEW.num_of_hours;
 	SET alecturer_id = NEW.lecturer_id;
 
-	SELECT course_plus.start_time, course_plus.end_time, course_plus.class_num, course_plus.day INTO astart_time, aend_time, aclass_num, aday
+	SELECT course_plus.start_time, course_plus.end_time, course_plus.class_num, course_plus.day
+		INTO astart_time, aend_time, aclass_num, aday
 	FROM
 	(
 		SELECT (TIME_TO_SEC(takes_place.hour)/3600) as start_time,
@@ -85,7 +89,188 @@ BEGIN
 END; //
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*trigger for number of phones*/
+/*
+*Update takes_places
+*/
+DELIMITER //
+DROP TRIGGER IF EXISTS secure_lecturers_classes//
+CREATE TRIGGER secure_lecturers_classes_by_takes_place_update BEFORE UPDATE ON takes_place
+FOR EACH ROW
+BEGIN
+	DECLARE msg VARCHAR(255);
+
+	DECLARE acourse_num INTEGER;
+	DECLARE asemester VARCHAR(1);
+	DECLARE aday ENUM('Sun','Mon','Tue','Wen','Thu','Fri');
+	DECLARE anum_of_hours INTEGER;
+	DECLARE astart_time INTEGER;
+	DECLARE aend_time INTEGER;
+	DECLARE alecturer_id VARCHAR(10);
+	DECLARE aclass_num INTEGER;
+
+	DECLARE acount_lecturer INTEGER;
+	DECLARE acount_takeplace INTEGER;
+
+	SET acourse_num = NEW.course_num;
+	SET aday = NEW.day;
+	SET astart_time = (TIME_TO_SEC(takes_place.hour)/3600);
+	SET aclass_num = NEW.class_num;
+
+	SELECT course_plus.semester, course_plus.num_of_hours, course_plus.end_time, course_plus.lecturer_id
+		INTO asemester, anum_of_hours, aend_time, alecturer_id
+	FROM
+	(
+		SELECT course.semester as semester, course.num_of_hours as num_of_hours,
+			(course.num_of_hours + astart_time) as end_time, course.lecturer_id as lecturer_id,
+			course.course_num as course_num
+		FROM takes_place INNER JOIN course ON course.course_num = takes_place.course_num
+		WHERE	course.course_num = acourse_num
+	)AS course_plus;
+
+	SELECT COUNT(course_plus1.course_num) INTO acount_lecturer
+		FROM(
+			SELECT (TIME_TO_SEC(takes_place.hour)/3600) as start_time,
+				(TIME_TO_SEC(DATE_ADD(takes_place.hour, INTERVAL anum_of_hours HOUR))/3600) as end_time,
+				course.course_num as course_num, takes_place.day as day
+			FROM takes_place INNER JOIN course ON course.course_num = takes_place.course_num
+			WHERE	course.lecturer_id = alecturer_id AND course.semester = asemester AND takes_place.day = aday
+		)AS course_plus1
+
+		WHERE(
+			(course_plus1.start_time <= astart_time
+				AND course_plus1.end_time > astart_time)
+			OR
+			(course_plus1.start_time < aend_time
+				AND course_plus1.end_time >= aend_time)
+			OR
+			(course_plus1.start_time >= astart_time
+				AND course_plus1.end_time <= aend_time)
+		)
+	;
+
+	SELECT COUNT(course_plus2.course_num) INTO acount_takeplace
+		FROM(
+			SELECT (TIME_TO_SEC(takes_place.hour)/3600) as start_time,
+				(TIME_TO_SEC(DATE_ADD(takes_place.hour, INTERVAL anum_of_hours HOUR))/3600) as end_time,
+				course.course_num as course_num, takes_place.day as day
+			FROM takes_place INNER JOIN course ON course.course_num = takes_place.course_num
+			WHERE	takes_place.class_num = aclass_num AND course.semester = asemester AND takes_place.day = aday
+				AND course.course_num != acourse_num
+		)AS course_plus2
+
+		WHERE(
+			(course_plus2.start_time < astart_time
+				AND course_plus2.end_time >= astart_time)
+			OR
+			(course_plus2.start_time <= aend_time
+				AND course_plus2.end_time > aend_time)
+			OR
+			(course_plus2.start_time >= astart_time
+				AND course_plus2.end_time <= aend_time)
+		)
+	;
+
+	IF((acount_lecturer > 0) OR (acount_takeplace > 0))
+	THEN
+			set msg = "The are Problems with the requested change. Please check the Lecturer or the class scheduele";
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
+	END IF;
+
+END; //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+*Insert takes_places
+*/
+DELIMITER //
+DROP TRIGGER IF EXISTS secure_lecturers_classes//
+CREATE TRIGGER secure_lecturers_classes_by_takes_place_insert BEFORE INSERT ON takes_place
+FOR EACH ROW
+BEGIN
+	DECLARE msg VARCHAR(255);
+
+	DECLARE acourse_num INTEGER;
+	DECLARE asemester VARCHAR(1);
+	DECLARE aday ENUM('Sun','Mon','Tue','Wen','Thu','Fri');
+	DECLARE anum_of_hours INTEGER;
+	DECLARE astart_time INTEGER;
+	DECLARE aend_time INTEGER;
+	DECLARE alecturer_id VARCHAR(10);
+	DECLARE aclass_num INTEGER;
+
+	DECLARE acount_lecturer INTEGER;
+	DECLARE acount_takeplace INTEGER;
+
+	SET acourse_num = NEW.course_num;
+	SET aday = NEW.day;
+	SET astart_time = (TIME_TO_SEC(takes_place.hour)/3600);
+	SET aclass_num = NEW.class_num;
+
+	SELECT course_plus.semester, course_plus.num_of_hours, course_plus.end_time, course_plus.lecturer_id
+		INTO asemester, anum_of_hours, aend_time, alecturer_id
+	FROM
+	(
+		SELECT course.semester as semester, course.num_of_hours as num_of_hours,
+			(course.num_of_hours + astart_time) as end_time, course.lecturer_id as lecturer_id,
+			course.course_num as course_num
+		FROM takes_place INNER JOIN course ON course.course_num = takes_place.course_num
+		WHERE	course.course_num = acourse_num
+	)AS course_plus;
+
+	SELECT COUNT(course_plus1.course_num) INTO acount_lecturer
+		FROM(
+			SELECT (TIME_TO_SEC(takes_place.hour)/3600) as start_time,
+				(TIME_TO_SEC(DATE_ADD(takes_place.hour, INTERVAL anum_of_hours HOUR))/3600) as end_time,
+				course.course_num as course_num, takes_place.day as day
+			FROM takes_place INNER JOIN course ON course.course_num = takes_place.course_num
+			WHERE	course.lecturer_id = alecturer_id AND course.semester = asemester AND takes_place.day = aday
+		)AS course_plus1
+
+		WHERE(
+			(course_plus1.start_time <= astart_time
+				AND course_plus1.end_time > astart_time)
+			OR
+			(course_plus1.start_time < aend_time
+				AND course_plus1.end_time >= aend_time)
+			OR
+			(course_plus1.start_time >= astart_time
+				AND course_plus1.end_time <= aend_time)
+		)
+	;
+
+	SELECT COUNT(course_plus2.course_num) INTO acount_takeplace
+		FROM(
+			SELECT (TIME_TO_SEC(takes_place.hour)/3600) as start_time,
+				(TIME_TO_SEC(DATE_ADD(takes_place.hour, INTERVAL anum_of_hours HOUR))/3600) as end_time,
+				course.course_num as course_num, takes_place.day as day
+			FROM takes_place INNER JOIN course ON course.course_num = takes_place.course_num
+			WHERE	takes_place.class_num = aclass_num AND course.semester = asemester AND takes_place.day = aday
+				AND course.course_num != acourse_num
+		)AS course_plus2
+
+		WHERE(
+			(course_plus2.start_time < astart_time
+				AND course_plus2.end_time >= astart_time)
+			OR
+			(course_plus2.start_time <= aend_time
+				AND course_plus2.end_time > aend_time)
+			OR
+			(course_plus2.start_time >= astart_time
+				AND course_plus2.end_time <= aend_time)
+		)
+	;
+
+	IF((acount_lecturer > 0) OR (acount_takeplace > 0))
+	THEN
+			set msg = "The are Problems with the requested change. Please check the Lecturer or the class scheduele";
+      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
+	END IF;
+
+END; //
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+*Trigger for number of phones
+*/
 DELIMITER //
 DROP TRIGGER IF EXISTS delete_phone//
 CREATE TRIGGER delete_phone BEFORE INSERT ON phone
@@ -102,84 +287,3 @@ BEGIN
 	END IF;
 
 END; //
-
-/*trigger for course change lecturer id*/
-
-
-
-/////////////////////////////////////////////////
-/////////////////////////////
-SELECT course.semester, takes_place.hour, DATE_ADD(takes_place.hour, INTERVAL course.num_of_hours HOUR)
-	INTO semester, start_time, end_time
-	FROM course
-	INNER JOIN takes_place ON course.course_num = takes_place.course_num
-	WHERE course.course_num = num_of_course;
-/////////////////////////////
-
-SELECT lecturer.last_name, lecturer.first_name, course.course_name, class.class_num, takes_place.day, takes_place.hour,
-              DATE_ADD(takes_place.hour, INTERVAL course.num_of_hours HOUR) as and_hour
-              FROM lecturer
-              INNER JOIN course
-              ON lecturer.lecturer_id=course.lecturer_id
-              INNER JOIN takes_place
-              ON course.course_num=takes_place.course_num
-              INNER JOIN class
-              ON takes_place.class_num = class.class_num
-              ORDER BY lecturer.last_name;
-
-SELECT course.lecturer_id, course.course_num,takes_place.day, takes_place.hour,
-              DATE_ADD(takes_place.hour, INTERVAL course.num_of_hours HOUR) as and_hour
-             	FROM course
-              INNER JOIN takes_place
-              ON course.course_num=takes_place.course_num;
-
-SELECT TIME_TO_SEC (takes_place.hour)/3600
-FROM course
-INNER JOIN takes_place ON course.course_num = takes_place.course_num;
-
-
-
-SELECT COUNT(course_num) INTO num_of_couurse
-	FROM lecturer INNER JOIN
-	(
-		SELECT lecturer.lecturer_id, lecturer.first_name, course.course_num,takes_place.day, takes_place.hour,
-              SELECT course.lecturer_id, course.course_num,takes_place.day, takes_place.hour,
-              DATE_ADD(takes_place.hour, INTERVAL course.num_of_hours HOUR) as and_hour
-             	FROM course
-              INNER JOIN takes_place
-              ON course.course_num=takes_place.course_num;
-	) as course_place
-	ON course.lecturer_id = lecturer.lecturer_id
-	;
-
-	IF( num_of_phones > 2)
-	THEN
-			set msg = "You can't insert more then 3 phones number!!!";
-      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = msg;
-	END IF;
-
-
-
-
-
-SELECT lecturer.last_name, lecturer.first_name, lecturer.lecturer_id,
-                course.course_name, takes_place_plus.class_num, takes_place_plus.day, takes_place_plus.hour,
-                DATE_ADD(takes_place_plus.hour, INTERVAL course.num_of_hours HOUR) as end_hour
-                FROM lecturer INNER JOIN course ON lecturer.lecturer_id = course.lecturer_id
-                INNER JOIN
-                (
-                  SELECT takes_place.class_num AS class_num, takes_place.day AS day,
-					takes_place.hour AS hour, takes_place.course_num AS course_num,
-                   (takes_place.day*100 + (TIME_TO_SEC(takes_place.hour)/3600)) as s_dayhour,
-                   (takes_place.day*100 + (TIME_TO_SEC(DATE_ADD(takes_place.hour, INTERVAL course.num_of_hours HOUR))/3600)) as e_dayhour
-                   FROM
-                  takes_place INNER JOIN course ON course.course_num=takes_place.course_num
-                ) AS takes_place_plus
-                ON takes_place_plus.course_num = course.course_num
-                WHERE (takes_place_plus.s_dayhour<=("'.($s_day*100).'"+ (TIME_TO_SEC("'.$s_hour.'")/3600))
-				  AND takes_place_plus.e_dayhour>=("'.($s_day*100).'"+ (TIME_TO_SEC("'.$s_hour.'")/3600)))
-				OR (takes_place_plus.s_dayhour<=("'.($e_day*100).'"+ (TIME_TO_SEC("'.$e_hour.'")/3600))
-				  AND takes_place_plus.e_dayhour>=("'.($e_day*100).'"+ (TIME_TO_SEC("'.$e_hour.'")/3600)))
-				OR (takes_place_plus.s_dayhour>=("'.($s_day*100).'"+ (TIME_TO_SEC("'.$s_hour.'")/3600))
-				  AND (takes_place_plus.e_dayhour<=("'.($e_day*100).'"+ (TIME_TO_SEC("'.$e_hour.'")/3600))))
- 				ORDER BY (takes_place_plus.s_dayhour)';
