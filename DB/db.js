@@ -2,7 +2,6 @@
 //Submmition: Final Project
 //Student: Alexander Djura
 //Student: Shamir Kritzler
-//Languige: javaScript,Node.js
 //Addition: for running you must install Node.js and "mysql" package
 
 var mysql = require('mysql');
@@ -192,6 +191,71 @@ connection.query(
                     ' END IF;' +
                     ' END;'
 );
+
+//trigger for checking if lecturer is available before update course to him
+connection.query(
+                    'CREATE TRIGGER secure_lecturers_classes BEFORE UPDATE ON course'+
+                    ' FOR EACH ROW'+
+                    ' BEGIN'+
+                    ' DECLARE msg VARCHAR(255);'+
+
+                    ' DECLARE acourse_num INTEGER;'+
+                    ' DECLARE asemester VARCHAR(1);'+
+                    ' DECLARE aday ENUM(\'Sun\',\'Mon\',\'Tue\',\'Wed\',\'Thu\',\'Fri\');'+
+                    ' DECLARE anum_of_hours INTEGER;'+
+                    ' DECLARE astart_time INTEGER;'+
+                    ' DECLARE aend_time INTEGER;'+
+                    ' DECLARE alecturer_id VARCHAR(10);'+
+                    ' DECLARE aclass_num INTEGER;'+
+
+                    ' DECLARE acount_lecturer INTEGER;'+
+                    ' DECLARE acount_takeplace INTEGER;'+
+
+                    ' SET acourse_num = NEW.course_num;'+
+                    ' SET asemester = NEW.semester;'+
+                    ' SET anum_of_hours = NEW.num_of_hours;'+
+                    ' SET alecturer_id = NEW.lecturer_id;'+
+
+                    ' SELECT course_plus.start_time, course_plus.end_time, course_plus.class_num, course_plus.day INTO astart_time, aend_time, aclass_num, aday'+
+                    ' FROM'+
+                    ' (  SELECT (TIME_TO_SEC(takes_place.hour)/3600) as start_time,'+
+                        ' (TIME_TO_SEC(DATE_ADD(takes_place.hour, INTERVAL anum_of_hours HOUR))/3600) as end_time,'+
+                        ' takes_place.class_num as class_num, course.course_num as course_num, takes_place.day as day'+
+                        ' FROM takes_place INNER JOIN course ON course.course_num = takes_place.course_num'+
+                    ' )AS course_plus'+
+                    ' WHERE	course_plus.course_num = acourse_num;'+
+
+                    ' SELECT COUNT(course_plus2.course_num) INTO acount_takeplace'+
+                    ' FROM('+
+                        ' SELECT (TIME_TO_SEC(takes_place.hour)/3600) as start_time,'+
+                        ' (TIME_TO_SEC(DATE_ADD(takes_place.hour, INTERVAL anum_of_hours HOUR))/3600) as end_time,'+
+                    ' course.course_num as course_num, takes_place.day as day'+
+                    ' FROM takes_place INNER JOIN course ON course.course_num = takes_place.course_num'+
+                    ' WHERE	takes_place.class_num = aclass_num AND course.semester = asemester AND takes_place.day = aday'+
+                    ' AND course.course_num != acourse_num'+
+                    ' )AS course_plus2'+
+
+                    ' WHERE('+
+                        ' (course_plus2.start_time < astart_time'+
+                    ' AND course_plus2.end_time >= astart_time)'+
+                    ' OR'+
+                    ' (course_plus2.start_time <= aend_time'+
+                    ' AND course_plus2.end_time > aend_time)'+
+                    ' OR'+
+                    ' (course_plus2.start_time >= astart_time'+
+                    ' AND course_plus2.end_time <= aend_time)'+
+                    ' )'+
+                    ' ;'+
+
+
+                    ' IF((acount_lecturer > 0) OR (acount_takeplace > 0))'+
+                    ' THEN' +
+                    ' set msg = \"The are Problems with the requested change. Please check the Lecturer or the class scheduele\";'+
+                    ' SIGNAL SQLSTATE \'45000\' SET MESSAGE_TEXT = msg;' +
+                    ' END IF;' +
+                    ' END;'
+);
+
 
 //disconnection
 connection.end();
