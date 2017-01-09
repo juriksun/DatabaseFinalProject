@@ -45,8 +45,8 @@
                 ) AS takes_place_plus
                 ON takes_place_plus.course_num = course.course_num
                 WHERE (takes_place_plus.s_dayhour<=("'.($s_day*100).'"+ (TIME_TO_SEC("'.$s_hour.'")/3600))
-				  AND takes_place_plus.e_dayhour>=("'.($s_day*100).'"+ (TIME_TO_SEC("'.$s_hour.'")/3600)))
-				OR (takes_place_plus.s_dayhour<=("'.($e_day*100).'"+ (TIME_TO_SEC("'.$e_hour.'")/3600))
+				  AND takes_place_plus.e_dayhour>("'.($s_day*100).'"+ (TIME_TO_SEC("'.$s_hour.'")/3600)))
+				OR (takes_place_plus.s_dayhour<("'.($e_day*100).'"+ (TIME_TO_SEC("'.$e_hour.'")/3600))
 				  AND takes_place_plus.e_dayhour>=("'.($e_day*100).'"+ (TIME_TO_SEC("'.$e_hour.'")/3600)))
 				OR (takes_place_plus.s_dayhour>=("'.($s_day*100).'"+ (TIME_TO_SEC("'.$s_hour.'")/3600))
 				  AND (takes_place_plus.e_dayhour<=("'.($e_day*100).'"+ (TIME_TO_SEC("'.$e_hour.'")/3600))))
