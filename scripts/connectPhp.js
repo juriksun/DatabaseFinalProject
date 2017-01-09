@@ -274,10 +274,10 @@ var schedule = {
                co_num:course_num, cl_num:class_num, day:day, hour:hour
             }, function (data) {
                 if (data == "true") {
-                    $("#statusMassage").html("The course Associate with class " +class_num);
+                    $("#statusMassage").html("The course Associate with class " + class_num);
                     loadData("./php/get_unpaired_courses_table_info.php", "#unpairedCoursesTable");
                 } else {
-                    $("#statusMassage").html("The not course Associate");
+                    $("#statusMassage").html("The not course Associate" + data);
                 }
             });
         }
