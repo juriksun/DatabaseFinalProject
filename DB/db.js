@@ -271,5 +271,72 @@ connection.query(
                     ' END;'
 );
 
+/*
+ *Procedure for check Associating lecturer and takes_place
+ */
+connection.query(
+                'CREATE PROCEDURE check_lecturer_and_takes_place(IN acourse_num INTEGER,	IN asemester VARCHAR(1),' +
+                '   IN aday INTEGER, IN anum_of_hours INTEGER, IN astart_time INTEGER,' +
+                '   IN aend_time INTEGER, IN alecturer_id VARCHAR(10), IN aclass_num INTEGER)' +
+
+                ' BEGIN' +
+
+                '   DECLARE msg VARCHAR(255);' +
+                '   DECLARE acount_lecturer INTEGER;' +
+                '   DECLARE acount_takeplace INTEGER;' +
+
+                '   SELECT COUNT(course_plus1.course_num) INTO acount_lecturer' +
+                '   FROM(' +
+                '       SELECT (TIME_TO_SEC(takes_place.hour)/3600) as start_time,' +
+                '           (TIME_TO_SEC(DATE_ADD(takes_place.hour, INTERVAL anum_of_hours HOUR))/3600) as end_time,' +
+                '           course.course_num as course_num, takes_place.day as day' +
+                '       FROM takes_place INNER JOIN course ON course.course_num = takes_place.course_num' +
+                '       WHERE	course.lecturer_id = alecturer_id AND course.semester = asemester AND takes_place.day = aday' +
+                '           AND course.course_num != acourse_num' +
+                '   )AS course_plus1' +
+
+                '   WHERE(' +
+                '       (course_plus1.start_time <= astart_time' +
+                '           AND course_plus1.end_time > astart_time)' +
+                '       OR' +
+                '       (course_plus1.start_time < aend_time' +
+                '           AND course_plus1.end_time >= aend_time)' +
+                '       OR' +
+                '       (course_plus1.start_time >= astart_time' +
+                '           AND course_plus1.end_time <= aend_time)' +
+                '   )' +
+                '   ;' +
+
+                '   SELECT COUNT(course_plus2.course_num) INTO acount_takeplace' +
+                '   FROM(' +
+                '       SELECT (TIME_TO_SEC(takes_place.hour)/3600) as start_time,' +
+                '       (TIME_TO_SEC(DATE_ADD(takes_place.hour, INTERVAL anum_of_hours HOUR))/3600) as end_time,' +
+                '   course.course_num as course_num, takes_place.day as day' +
+                '   FROM takes_place INNER JOIN course ON course.course_num = takes_place.course_num' +
+                '   WHERE	takes_place.class_num = aclass_num AND course.semester = asemester AND takes_place.day = aday' +
+                '   AND course.course_num != acourse_num' +
+                '   )AS course_plus2' +
+
+                '   WHERE(' +
+                '   (course_plus2.start_time < astart_time' +
+                '   AND course_plus2.end_time >= astart_time)' +
+                '   OR' +
+                '   (course_plus2.start_time <= aend_time' +
+                '   AND course_plus2.end_time > aend_time)' +
+                '   OR' +
+                '   (course_plus2.start_time >= astart_time' +
+                '   AND course_plus2.end_time <= aend_time)' +
+                '   )' +
+                '   ;' +
+
+                '   IF((acount_lecturer > 0) OR (acount_takeplace > 0))' +
+                '   THEN' +
+                '   set msg = \"The are Problems with the requested change. Please check the Lecturer or the class scheduele\";' +
+                '   SIGNAL SQLSTATE \'45000\' SET MESSAGE_TEXT = msg;' +
+                '   END IF;' +
+                '   END;'
+);
+
+
 //disconnection
 connection.end();
