@@ -305,7 +305,8 @@ connection.query(
                     ' CREATE TRIGGER secure_lecturers_classes_by_takes_place_insert BEFORE INSERT ON takes_place'+
                     ' FOR EACH ROW'+
                     ' BEGIN'+
-
+                    ' DECLARE msg VARCHAR(255);' +
+                    ' DECLARE acount_takeplace INTEGER; ' +
                     ' DECLARE acourse_num INTEGER;'+
                     ' DECLARE asemester VARCHAR(1);'+
                     ' DECLARE aday INTEGER;'+
@@ -330,6 +331,16 @@ connection.query(
                     ' FROM course'+
                     ' WHERE	course.course_num = acourse_num'+
                     ' )AS course_plus;'+
+
+                    ' SELECT COUNT(course.course_num) INTO acount_takeplace'+
+                    ' FROM takes_place INNER JOIN course ON course.course_num = takes_place.course_num'+
+                    ' WHERE course.course_num = acourse_num;'+
+
+                    ' IF(acount_takeplace > 0)'+
+                    ' THEN'+
+                    ' set msg = \"The are Problems with the requested change. Please check the Lecturer or the class scheduele\";'+
+                    ' SIGNAL SQLSTATE \'45000\' SET MESSAGE_TEXT = msg;'+
+                    ' END IF;'+
 
                     ' CALL check_lecturer_and_takes_place(acourse_num, asemester, aday,'+
                     ' anum_of_hours, astart_time, aend_time, alecturer_id, aclass_num);'+

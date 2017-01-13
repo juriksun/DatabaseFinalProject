@@ -1,6 +1,4 @@
 <?php
-    require_once("mysqli_connect.php");
-
     $entered = false;
     $query1 = 'UPDATE lecturer SET ' ;
 
@@ -42,9 +40,11 @@
 
     $query1 .=' WHERE lecturer_id="'.$lecturer_id.'"';
 
+    require_once("mysqli_connect.php");
     if (mysqli_query($dbc, $query1)) {
         echo "true";
     } else {
         echo "Error updating record: " . mysqli_error($dbc);
     }
+    mysqli_close($dbc);
 ?>

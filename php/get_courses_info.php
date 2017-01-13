@@ -34,5 +34,6 @@
         echo "Couldn't issue database query<br>";
         echo mysqli_error($dbc);
     }
+    mysqli_close($dbc);
 ?>
 

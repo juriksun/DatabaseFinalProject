@@ -36,10 +36,12 @@
         if($affected_rows == 1){
             echo 'true';
             mysqli_stmt_close($stmt);
+            mysqli_close($dbc);
         } else {
             echo 'Error Occurred<br/>';
             echo mysqli_error();
             mysqli_stmt_close($stmt);
+            mysqli_close($dbc);
         }
     } else {
         echo 'You need to enter the following data<br/>';

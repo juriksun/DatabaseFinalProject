@@ -89,10 +89,5 @@
         echo "Couldn't issue database query<br>";
         echo mysqli_error($dbc);
     }
-/**
- * Created by PhpStorm.
- * User: Shamir
- * Date: 27-Dec-16
- * Time: 17:27
- */
+    mysqli_close($dbc);
 ?>

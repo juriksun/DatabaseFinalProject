@@ -31,11 +31,11 @@
                 echo mysqli_error($dbc);
             }
         }
+        mysqli_close($dbc);
     } else {
         echo 'You need to enter the following data<br/>';
         foreach($data_missing as $missing){
             echo "$missing<br/>";
         }
     }
-    mysqli_close($dbc);
 ?>

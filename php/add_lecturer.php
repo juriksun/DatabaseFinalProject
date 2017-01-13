@@ -80,14 +80,14 @@
             echo 'true';
             mysqli_stmt_close($stmt);
             mysqli_stmt_close($stmt2);
-             //mysqli_close($dbc);
+            mysqli_close($dbc);
          } else {
             mysqli_query($dbc,"ROLLBACK");
             echo 'Error Occurred<br/>';
             echo mysqli_error($dbc);
             mysqli_stmt_close($stmt);
             mysqli_stmt_close($stmt2);
-            //mysqli_close($dbc);
+            mysqli_close($dbc);
          }
      } else {
          echo 'You need to enter the following data<br/>';

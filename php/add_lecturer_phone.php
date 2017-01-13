@@ -32,15 +32,13 @@
 
                  echo 'true';
                  mysqli_stmt_close($stmt);
-
-                  mysqli_close($dbc);
+                 mysqli_close($dbc);
               } else {
 
                  echo 'Error Occurred<br/>';
                  echo mysqli_error($dbc);
                  mysqli_stmt_close($stmt);
-
-                 //mysqli_close($dbc);
+                 mysqli_close($dbc);
               }
           } else {
               echo 'You need to enter the following data<br/>';

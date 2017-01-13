@@ -6,7 +6,7 @@
         // Trim white space from the name and store the name
         $xxx = trim($_POST['c_num']);
     }
-// Get a connection for the database
+
     require_once('mysqli_connect.php');
     // Create a query for the database
     $query = "SELECT lecturer.last_name, lecturer.first_name, course.course_name, takes_place.class_num
@@ -44,10 +44,5 @@
         echo "Couldn't issue database query<br>";
         echo mysqli_error($dbc);
     }
-/**
- * Created by PhpStorm.
- * User: Shamir
- * Date: 25-Dec-16
- * Time: 17:11
- */
+    mysqli_close($dbc);
 ?>

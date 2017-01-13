@@ -1,5 +1,4 @@
 <?php
-    require_once("mysqli_connect.php");
     $entered = false;
     $sql = 'UPDATE course SET ' ;
 
@@ -48,9 +47,12 @@
 
     $sql .=' WHERE course_num='.$c_num;
 
+    require_once("mysqli_connect.php");
     if (mysqli_query($dbc, $sql)) {
         echo "true";
+
     } else {
         echo "Error updating record: " . mysqli_error($dbc);
     }
+    mysqli_close($dbc);
 ?>

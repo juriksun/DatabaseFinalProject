@@ -1,6 +1,5 @@
 <?php
     $data_missing = array();
-    require_once("mysqli_connect.php");
     $sql = 'DELETE FROM class WHERE class_num=';
     if(empty($_POST['c_num'])){
         // Adds name to array
@@ -11,11 +10,14 @@
     }
 
     if(empty($data_missing)) {
+        require_once("mysqli_connect.php");
         if (mysqli_query($dbc, $sql)) {
             echo "true";
+            mysqli_close($dbc);
         } else {
             echo 'Error Occurred<br/>';
             echo mysqli_error($dbc);
+            mysqli_close($dbc);
         }
     } else {
         echo 'You need to enter the following data<br/>';

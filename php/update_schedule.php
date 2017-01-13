@@ -39,8 +39,10 @@
             $query = "INSERT INTO takes_place (class_num, course_num, day, hour) VALUES ('$class_num', '$course_num', '$day', '$hour')";
             if (mysqli_query($dbc, $query)) {
                 echo "true";
+                mysqli_close($dbc);
             } else {
                 echo "Error updating record: " . mysqli_error($dbc);
+                mysqli_close($dbc);
             }
         } else {
             echo 'You need to enter the following data<br/>';
@@ -48,5 +50,4 @@
                 echo "$missing<br/>";
             }
         }
-
 ?>
